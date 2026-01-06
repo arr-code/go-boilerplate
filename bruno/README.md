@@ -49,21 +49,31 @@ bruno/
 
 ## Environment Variables
 
-The collection uses the following variables:
+The collection uses the following variables (defined globally in environment files):
 
-- `base_url`: API base URL
+- `base_url`: API base URL (configured in Local.bru or Production.bru)
 - `access_token`: JWT access token (auto-set after login/register)
 - `refresh_token`: JWT refresh token (auto-set after login/register)
 
-### Local Environment
+### Local Environment (environments/Local.bru)
 ```
-base_url: http://localhost:8080
+vars {
+  base_url: http://localhost:8080
+  access_token:
+  refresh_token:
+}
 ```
 
-### Production Environment
+### Production Environment (environments/Production.bru)
 ```
-base_url: https://api.yourproduction.com
+vars {
+  base_url: https://api.yourproduction.com
+  access_token:
+  refresh_token:
+}
 ```
+
+**Note:** The `base_url` is defined globally in the environment files, so you only need to change it in one place when switching environments.
 
 ## Automatic Token Management
 

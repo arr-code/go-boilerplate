@@ -48,6 +48,10 @@ docker-build:
 	@echo "Building Docker image..."
 	docker build -t xnoia-go-boilerplate:latest .
 
+run:
+	@echo "Program Starting..."
+	go run cmd/api/main.go
+
 test:
 	@echo "Running tests..."
 	go test -v ./...

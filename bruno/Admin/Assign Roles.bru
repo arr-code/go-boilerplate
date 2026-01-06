@@ -20,10 +20,6 @@ body:json {
   }
 }
 
-vars:pre-request {
-  base_url: http://localhost:8080
-}
-
 tests {
   test("should return 200", function() {
     expect(res.status).to.equal(200);

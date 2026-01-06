@@ -17,10 +17,6 @@ body:json {
   }
 }
 
-vars:pre-request {
-  base_url: http://localhost:8080
-}
-
 script:post-response {
   if (res.status === 200) {
     bru.setVar("access_token", res.body.data.access_token);
