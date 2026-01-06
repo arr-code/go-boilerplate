@@ -1,0 +1,40 @@
+meta {
+  name: Deactivate User
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{base_url}}/api/v1/admin/users/5
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should return success message", function() {
+    expect(res.body.success).to.equal(true);
+    expect(res.body.message).to.include('deactivated');
+  });
+}
+
+docs {
+  # Deactivate User (Admin Only)
+  
+  Mark a user account as inactive. The user will no longer be able to login.
+  
+  **Note:** Change the user ID in the URL (currently set to 5)
+  
+  **Required Role:** admin
+}

@@ -1,0 +1,45 @@
+meta {
+  name: Upload Avatar
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/api/v1/profile/avatar
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:multipart-form {
+  avatar: @file(C:\path\to\your\avatar.jpg)
+}
+
+docs {
+  # Upload Avatar
+
+  Upload a profile avatar image.
+
+  **Accepted file types:**
+  - image/jpeg
+  - image/png
+  - image/gif
+  - image/webp
+
+  **Max file size:** 5MB
+
+  Replace `C:\path\to\your\avatar.jpg` with the actual path to your image file.
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("should return avatar URL", function() {
+    expect(res.body.data.avatar_url).to.be.a('string');
+  });
+}

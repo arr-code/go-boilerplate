@@ -1,0 +1,35 @@
+meta {
+  name: Get Me
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/api/v1/auth/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should return current user", function() {
+    expect(res.body.data.id).to.be.a('number');
+    expect(res.body.data.email).to.be.a('string');
+    expect(res.body.data.username).to.be.a('string');
+  });
+  
+  test("should include roles", function() {
+    expect(res.body.data.roles).to.be.an('array');
+  });
+}

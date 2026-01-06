@@ -1,0 +1,51 @@
+meta {
+  name: Assign Roles
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{base_url}}/api/v1/admin/users/1/roles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "role_ids": [2]
+  }
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should return success message", function() {
+    expect(res.body.success).to.equal(true);
+    expect(res.body.message).to.include('assigned');
+  });
+}
+
+docs {
+  # Assign Roles to User (Admin Only)
+  
+  Assign roles to a specific user. This replaces all existing roles.
+  
+  **Role IDs:**
+  - 1: user
+  - 2: admin
+  - 3: moderator
+  
+  **Example:** Assign admin role to user ID 1
+  
+  **Required Role:** admin
+}

@@ -1,0 +1,36 @@
+meta {
+  name: Update Profile
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{base_url}}/api/v1/profile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "full_name": "John Doe Updated",
+    "phone": "+1234567890",
+    "address": "123 Main Street, New York, NY 10001",
+    "date_of_birth": "1990-01-15",
+    "bio": "Software engineer passionate about Go and distributed systems"
+  }
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("should return success message", function() {
+    expect(res.body.success).to.equal(true);
+    expect(res.body.message).to.include('updated');
+  });
+}

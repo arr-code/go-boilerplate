@@ -1,0 +1,46 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/health
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should be healthy", function() {
+    expect(res.body.status).to.equal('healthy');
+  });
+  
+  test("should have database connected", function() {
+    expect(res.body.database).to.equal('connected');
+  });
+  
+  test("should include timestamp", function() {
+    expect(res.body.timestamp).to.be.a('number');
+  });
+}
+
+docs {
+  # Health Check
+  
+  Check the health status of the API and its dependencies.
+  
+  **No authentication required**
+  
+  Returns:
+  - API status
+  - Database connection status
+  - Timestamp
+}

@@ -1,0 +1,47 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/api/v1/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "login": "johndoe",
+    "password": "SecurePass123"
+  }
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setVar("access_token", res.body.data.access_token);
+    bru.setVar("refresh_token", res.body.data.refresh_token);
+  }
+}
+
+tests {
+  test("should return 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("should return access token", function() {
+    expect(res.body.data.access_token).to.be.a('string');
+  });
+  
+  test("should return refresh token", function() {
+    expect(res.body.data.refresh_token).to.be.a('string');
+  });
+  
+  test("should return user with roles", function() {
+    expect(res.body.data.user.roles).to.be.an('array');
+  });
+}
