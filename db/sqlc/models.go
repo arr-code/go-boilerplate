@@ -9,7 +9,7 @@ import (
 )
 
 type Role struct {
-	ID          int32
+	ID          string
 	RoleName    string
 	Description sql.NullString
 	Permissions []byte
@@ -18,7 +18,7 @@ type Role struct {
 }
 
 type User struct {
-	ID            int32
+	ID            string
 	Email         string
 	Username      string
 	PasswordHash  string
@@ -30,8 +30,8 @@ type User struct {
 }
 
 type UserDetail struct {
-	ID          int32
-	UserID      int32
+	ID          string
+	UserID      string
 	FullName    sql.NullString
 	Phone       sql.NullString
 	Address     sql.NullString
@@ -43,9 +43,9 @@ type UserDetail struct {
 }
 
 type UserRole struct {
-	ID         int32
-	UserID     int32
-	RoleID     int32
+	ID         string
+	UserID     string
+	RoleID     string
 	AssignedAt sql.NullTime
-	AssignedBy sql.NullInt32
+	AssignedBy sql.NullString
 }

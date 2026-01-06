@@ -15,7 +15,7 @@ UPDATE users SET is_active = true, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) ActivateUser(ctx context.Context, id int32) error {
+func (q *Queries) ActivateUser(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, activateUser, id)
 	return err
 }
@@ -73,7 +73,7 @@ UPDATE users SET is_active = false, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) DeactivateUser(ctx context.Context, id int32) error {
+func (q *Queries) DeactivateUser(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deactivateUser, id)
 	return err
 }
@@ -129,7 +129,7 @@ const getUserByID = `-- name: GetUserByID :one
 SELECT id, email, username, password_hash, is_active, email_verified, last_login, created_at, updated_at FROM users WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
@@ -217,7 +217,7 @@ WHERE id = $1
 `
 
 type UpdateUserLastLoginParams struct {
-	ID        int32
+	ID        string
 	LastLogin sql.NullTime
 }
 
@@ -232,7 +232,7 @@ WHERE id = $1
 `
 
 type UpdateUserPasswordParams struct {
-	ID           int32
+	ID           string
 	PasswordHash string
 }
 
@@ -246,7 +246,7 @@ UPDATE users SET email_verified = true, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) VerifyUserEmail(ctx context.Context, id int32) error {
+func (q *Queries) VerifyUserEmail(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, verifyUserEmail, id)
 	return err
 }
