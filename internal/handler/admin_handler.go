@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"strconv"
-
 	"xnoia-go-boilerplate/internal/model"
 	"xnoia-go-boilerplate/internal/service"
 	"xnoia-go-boilerplate/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AdminHandler struct {
@@ -44,11 +43,10 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 // AssignRoles assigns roles to a user
 // PUT /api/v1/admin/users/:id/roles
 func (h *AdminHandler) AssignRoles(c *gin.Context) {
-	// Get user ID from URL parameter
-	userIDParam := c.Param("id")
-	userID, err := strconv.ParseInt(userIDParam, 10, 64)
-	if err != nil {
-		utils.SendError(c, 400, "Invalid user ID", err)
+	// Get user ID from URL parameter and validate UUID
+	userID := c.Param("id")
+	if _, err := uuid.Parse(userID); err != nil {
+		utils.SendError(c, 400, "Invalid user ID format", err)
 		return
 	}
 
@@ -65,7 +63,7 @@ func (h *AdminHandler) AssignRoles(c *gin.Context) {
 		return
 	}
 
-	err = h.adminService.AssignRoles(c.Request.Context(), userID, req.RoleIDs, adminID.(int64))
+	err := h.adminService.AssignRoles(c.Request.Context(), userID, req.RoleIDs, adminID.(string))
 	if err != nil {
 		if err == model.ErrUserNotFound {
 			utils.SendError(c, 404, "User not found", err)
@@ -83,15 +81,14 @@ func (h *AdminHandler) AssignRoles(c *gin.Context) {
 // DeactivateUser deactivates a user account
 // DELETE /api/v1/admin/users/:id
 func (h *AdminHandler) DeactivateUser(c *gin.Context) {
-	// Get user ID from URL parameter
-	userIDParam := c.Param("id")
-	userID, err := strconv.ParseInt(userIDParam, 10, 64)
-	if err != nil {
-		utils.SendError(c, 400, "Invalid user ID", err)
+	// Get user ID from URL parameter and validate UUID
+	userID := c.Param("id")
+	if _, err := uuid.Parse(userID); err != nil {
+		utils.SendError(c, 400, "Invalid user ID format", err)
 		return
 	}
 
-	err = h.adminService.DeactivateUser(c.Request.Context(), userID)
+	err := h.adminService.DeactivateUser(c.Request.Context(), userID)
 	if err != nil {
 		if err == model.ErrUserNotFound {
 			utils.SendError(c, 404, "User not found", err)

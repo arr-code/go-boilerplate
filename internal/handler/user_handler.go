@@ -28,7 +28,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.userService.GetProfile(c.Request.Context(), userID.(int64))
+	resp, err := h.userService.GetProfile(c.Request.Context(), userID.(string))
 	if err != nil {
 		if err == model.ErrUserNotFound {
 			utils.SendError(c, 404, "Profile not found", err)
@@ -57,7 +57,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	err := h.userService.UpdateProfile(c.Request.Context(), userID.(int64), &req)
+	err := h.userService.UpdateProfile(c.Request.Context(), userID.(string), &req)
 	if err != nil {
 		if err == model.ErrUserNotFound {
 			utils.SendError(c, 404, "User not found", err)
@@ -88,7 +88,7 @@ func (h *UserHandler) UpdateAvatar(c *gin.Context) {
 	}
 
 	// Update avatar
-	avatarURL, err := h.userService.UpdateAvatar(c.Request.Context(), userID.(int64), file)
+	avatarURL, err := h.userService.UpdateAvatar(c.Request.Context(), userID.(string), file)
 	if err != nil {
 		switch err {
 		case model.ErrInvalidFileType:

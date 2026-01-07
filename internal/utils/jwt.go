@@ -11,7 +11,7 @@ import (
 )
 
 type JWTClaims struct {
-	UserID   int64    `json:"user_id"`
+	UserID   string   `json:"user_id"`
 	Email    string   `json:"email"`
 	Username string   `json:"username"`
 	Roles    []string `json:"roles"`
@@ -19,7 +19,7 @@ type JWTClaims struct {
 }
 
 // GenerateToken generates a JWT access token with user information and roles
-func GenerateToken(userID int64, email, username string, roles []string, secret string, expiration time.Duration) (string, error) {
+func GenerateToken(userID string, email, username string, roles []string, secret string, expiration time.Duration) (string, error) {
 	claims := JWTClaims{
 		UserID:   userID,
 		Email:    email,
@@ -42,9 +42,9 @@ func GenerateToken(userID int64, email, username string, roles []string, secret 
 }
 
 // GenerateRefreshToken generates a JWT refresh token with minimal claims
-func GenerateRefreshToken(userID int64, secret string, expiration time.Duration) (string, error) {
+func GenerateRefreshToken(userID string, secret string, expiration time.Duration) (string, error) {
 	claims := jwt.RegisteredClaims{
-		Subject:   fmt.Sprintf("%d", userID),
+		Subject:   userID,
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiration)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		NotBefore: jwt.NewNumericDate(time.Now()),
@@ -81,7 +81,7 @@ func ValidateToken(tokenString, secret string) (*JWTClaims, error) {
 }
 
 // ValidateRefreshToken validates a refresh token and returns the user ID
-func ValidateRefreshToken(tokenString, secret string) (int64, error) {
+func ValidateRefreshToken(tokenString, secret string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -90,19 +90,14 @@ func ValidateRefreshToken(tokenString, secret string) (int64, error) {
 	})
 
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse refresh token: %w", err)
+		return "", fmt.Errorf("failed to parse refresh token: %w", err)
 	}
 
 	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
-		var userID int64
-		_, err := fmt.Sscanf(claims.Subject, "%d", &userID)
-		if err != nil {
-			return 0, fmt.Errorf("invalid user ID in refresh token: %w", err)
-		}
-		return userID, nil
+		return claims.Subject, nil
 	}
 
-	return 0, errors.New("invalid refresh token")
+	return "", errors.New("invalid refresh token")
 }
 
 // ExtractTokenFromHeader extracts the JWT token from the Authorization header

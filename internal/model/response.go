@@ -13,7 +13,7 @@ type AuthResponse struct {
 
 // UserResponse represents the user data in responses
 type UserResponse struct {
-	ID            int64          `json:"id"`
+	ID            string         `json:"id"`
 	Email         string         `json:"email"`
 	Username      string         `json:"username"`
 	EmailVerified bool           `json:"email_verified"`
@@ -25,7 +25,7 @@ type UserResponse struct {
 
 // RoleResponse represents the role data in responses
 type RoleResponse struct {
-	ID          int64  `json:"id"`
+	ID          string `json:"id"`
 	RoleName    string `json:"role_name"`
 	Description string `json:"description,omitempty"`
 }
@@ -48,7 +48,7 @@ type UserDetailResponse struct {
 
 // UserListResponse represents a user in the admin user list
 type UserListResponse struct {
-	ID            int64          `json:"id"`
+	ID            string         `json:"id"`
 	Email         string         `json:"email"`
 	Username      string         `json:"username"`
 	EmailVerified bool           `json:"email_verified"`

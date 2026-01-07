@@ -12,15 +12,11 @@ post {
 
 body:json {
   {
-    "email": "john.doe@example.com",
-    "username": "johndoe",
-    "password": "SecurePass123",
-    "full_name": "John Doe"
+    "email": "admin@test.dev",
+    "username": "admin",
+    "password": "password",
+    "full_name": "admin"
   }
-}
-
-vars:pre-request {
-  base_url: http://localhost:8080
 }
 
 script:post-response {

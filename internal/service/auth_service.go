@@ -14,7 +14,7 @@ type AuthService interface {
 	Register(ctx context.Context, req *model.RegisterRequest) (*model.AuthResponse, error)
 	Login(ctx context.Context, req *model.LoginRequest) (*model.AuthResponse, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*model.AuthResponse, error)
-	GetCurrentUser(ctx context.Context, userID int64) (*model.UserResponse, error)
+	GetCurrentUser(ctx context.Context, userID string) (*model.UserResponse, error)
 }
 
 type authService struct {
@@ -79,7 +79,7 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 	}
 
 	// Create user details
-	_, err = s.repo.CreateUserDetails(ctx, int64(user.ID), req.FullName, "", "", nil, "", "")
+	_, err = s.repo.CreateUserDetails(ctx, user.ID, req.FullName, "", "", nil, "", "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user details: %w", err)
 	}
@@ -90,13 +90,13 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 		return nil, fmt.Errorf("failed to get default role: %w", err)
 	}
 
-	err = s.repo.AssignRoleToUser(ctx, int64(user.ID), int64(defaultRole.ID), 0)
+	err = s.repo.AssignRoleToUser(ctx, user.ID, defaultRole.ID, "")
 	if err != nil {
 		return nil, fmt.Errorf("failed to assign role: %w", err)
 	}
 
 	// Get user roles
-	roles, err := s.repo.GetUserRoles(ctx, int64(user.ID))
+	roles, err := s.repo.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
@@ -108,12 +108,12 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 	}
 
 	// Generate tokens
-	accessToken, err := utils.GenerateToken(int64(user.ID), user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
+	accessToken, err := utils.GenerateToken(user.ID, user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	refreshToken, err := utils.GenerateRefreshToken(int64(user.ID), s.jwtSecret, s.refreshExp)
+	refreshToken, err := utils.GenerateRefreshToken(user.ID, s.jwtSecret, s.refreshExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -122,7 +122,7 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 	roleResponses := make([]model.RoleResponse, len(roles))
 	for i, role := range roles {
 		roleResponses[i] = model.RoleResponse{
-			ID:          int64(role.ID),
+			ID:          role.ID,
 			RoleName:    role.RoleName,
 			Description: role.Description.String,
 		}
@@ -134,7 +134,7 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 		TokenType:    "Bearer",
 		ExpiresIn:    int64(s.jwtExp.Seconds()),
 		User: model.UserResponse{
-			ID:            int64(user.ID),
+			ID:            user.ID,
 			Email:         user.Email,
 			Username:      user.Username,
 			EmailVerified: user.EmailVerified.Bool,
@@ -167,14 +167,14 @@ func (s *authService) Login(ctx context.Context, req *model.LoginRequest) (*mode
 	}
 
 	// Update last login
-	err = s.repo.UpdateUserLastLogin(ctx, int64(user.ID), time.Now())
+	err = s.repo.UpdateUserLastLogin(ctx, user.ID, time.Now())
 	if err != nil {
 		// Log error but don't fail the login
 		fmt.Printf("Failed to update last login: %v\n", err)
 	}
 
 	// Get user roles
-	roles, err := s.repo.GetUserRoles(ctx, int64(user.ID))
+	roles, err := s.repo.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
@@ -186,12 +186,12 @@ func (s *authService) Login(ctx context.Context, req *model.LoginRequest) (*mode
 	}
 
 	// Generate tokens
-	accessToken, err := utils.GenerateToken(int64(user.ID), user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
+	accessToken, err := utils.GenerateToken(user.ID, user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	refreshToken, err := utils.GenerateRefreshToken(int64(user.ID), s.jwtSecret, s.refreshExp)
+	refreshToken, err := utils.GenerateRefreshToken(user.ID, s.jwtSecret, s.refreshExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -200,7 +200,7 @@ func (s *authService) Login(ctx context.Context, req *model.LoginRequest) (*mode
 	roleResponses := make([]model.RoleResponse, len(roles))
 	for i, role := range roles {
 		roleResponses[i] = model.RoleResponse{
-			ID:          int64(role.ID),
+			ID:          role.ID,
 			RoleName:    role.RoleName,
 			Description: role.Description.String,
 		}
@@ -217,7 +217,7 @@ func (s *authService) Login(ctx context.Context, req *model.LoginRequest) (*mode
 		TokenType:    "Bearer",
 		ExpiresIn:    int64(s.jwtExp.Seconds()),
 		User: model.UserResponse{
-			ID:            int64(user.ID),
+			ID:            user.ID,
 			Email:         user.Email,
 			Username:      user.Username,
 			EmailVerified: user.EmailVerified.Bool,
@@ -252,7 +252,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 	}
 
 	// Get user roles
-	roles, err := s.repo.GetUserRoles(ctx, int64(user.ID))
+	roles, err := s.repo.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
@@ -264,12 +264,12 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 	}
 
 	// Generate new tokens
-	newAccessToken, err := utils.GenerateToken(int64(user.ID), user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
+	newAccessToken, err := utils.GenerateToken(user.ID, user.Email, user.Username, roleNames, s.jwtSecret, s.jwtExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	newRefreshToken, err := utils.GenerateRefreshToken(int64(user.ID), s.jwtSecret, s.refreshExp)
+	newRefreshToken, err := utils.GenerateRefreshToken(user.ID, s.jwtSecret, s.refreshExp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -278,7 +278,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 	roleResponses := make([]model.RoleResponse, len(roles))
 	for i, role := range roles {
 		roleResponses[i] = model.RoleResponse{
-			ID:          int64(role.ID),
+			ID:          role.ID,
 			RoleName:    role.RoleName,
 			Description: role.Description.String,
 		}
@@ -295,7 +295,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 		TokenType:    "Bearer",
 		ExpiresIn:    int64(s.jwtExp.Seconds()),
 		User: model.UserResponse{
-			ID:            int64(user.ID),
+			ID:            user.ID,
 			Email:         user.Email,
 			Username:      user.Username,
 			EmailVerified: user.EmailVerified.Bool,
@@ -308,7 +308,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*m
 }
 
 // GetCurrentUser retrieves the current user information
-func (s *authService) GetCurrentUser(ctx context.Context, userID int64) (*model.UserResponse, error) {
+func (s *authService) GetCurrentUser(ctx context.Context, userID string) (*model.UserResponse, error) {
 	// Get user
 	user, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -316,7 +316,7 @@ func (s *authService) GetCurrentUser(ctx context.Context, userID int64) (*model.
 	}
 
 	// Get user roles
-	roles, err := s.repo.GetUserRoles(ctx, int64(user.ID))
+	roles, err := s.repo.GetUserRoles(ctx, user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
@@ -325,7 +325,7 @@ func (s *authService) GetCurrentUser(ctx context.Context, userID int64) (*model.
 	roleResponses := make([]model.RoleResponse, len(roles))
 	for i, role := range roles {
 		roleResponses[i] = model.RoleResponse{
-			ID:          int64(role.ID),
+			ID:          role.ID,
 			RoleName:    role.RoleName,
 			Description: role.Description.String,
 		}
@@ -337,7 +337,7 @@ func (s *authService) GetCurrentUser(ctx context.Context, userID int64) (*model.
 	}
 
 	return &model.UserResponse{
-		ID:            int64(user.ID),
+		ID:            user.ID,
 		Email:         user.Email,
 		Username:      user.Username,
 		EmailVerified: user.EmailVerified.Bool,

@@ -17,7 +17,7 @@ RETURNING id, user_id, full_name, phone, address, date_of_birth, avatar_url, bio
 `
 
 type CreateUserDetailsParams struct {
-	UserID      int32
+	UserID      string
 	FullName    sql.NullString
 	Phone       sql.NullString
 	Address     sql.NullString
@@ -56,7 +56,7 @@ const getUserDetailsByUserID = `-- name: GetUserDetailsByUserID :one
 SELECT id, user_id, full_name, phone, address, date_of_birth, avatar_url, bio, created_at, updated_at FROM user_details WHERE user_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserDetailsByUserID(ctx context.Context, userID int32) (UserDetail, error) {
+func (q *Queries) GetUserDetailsByUserID(ctx context.Context, userID string) (UserDetail, error) {
 	row := q.db.QueryRowContext(ctx, getUserDetailsByUserID, userID)
 	var i UserDetail
 	err := row.Scan(
@@ -81,7 +81,7 @@ WHERE user_id = $1
 `
 
 type UpdateUserAvatarParams struct {
-	UserID    int32
+	UserID    string
 	AvatarUrl sql.NullString
 }
 
@@ -102,7 +102,7 @@ WHERE user_id = $1
 `
 
 type UpdateUserDetailsParams struct {
-	UserID      int32
+	UserID      string
 	FullName    sql.NullString
 	Phone       sql.NullString
 	Address     sql.NullString

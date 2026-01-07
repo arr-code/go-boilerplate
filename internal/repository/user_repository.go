@@ -49,8 +49,8 @@ func (r *PostgresUserRepository) CreateUser(ctx context.Context, email, username
 	return &user, nil
 }
 
-func (r *PostgresUserRepository) GetUserByID(ctx context.Context, id int64) (*sqlc.User, error) {
-	user, err := r.queries.GetUserByID(ctx, int32(id))
+func (r *PostgresUserRepository) GetUserByID(ctx context.Context, id string) (*sqlc.User, error) {
+	user, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrUserNotFound
@@ -96,32 +96,32 @@ func (r *PostgresUserRepository) GetUserByEmailOrUsername(ctx context.Context, l
 	return &user, nil
 }
 
-func (r *PostgresUserRepository) UpdateUserLastLogin(ctx context.Context, id int64, loginTime time.Time) error {
+func (r *PostgresUserRepository) UpdateUserLastLogin(ctx context.Context, id string, loginTime time.Time) error {
 	err := r.queries.UpdateUserLastLogin(ctx, sqlc.UpdateUserLastLoginParams{
-		ID:        int32(id),
+		ID:        id,
 		LastLogin: sql.NullTime{Time: loginTime, Valid: true},
 	})
 	return err
 }
 
-func (r *PostgresUserRepository) UpdateUserPassword(ctx context.Context, id int64, passwordHash string) error {
+func (r *PostgresUserRepository) UpdateUserPassword(ctx context.Context, id string, passwordHash string) error {
 	err := r.queries.UpdateUserPassword(ctx, sqlc.UpdateUserPasswordParams{
-		ID:           int32(id),
+		ID:           id,
 		PasswordHash: passwordHash,
 	})
 	return err
 }
 
-func (r *PostgresUserRepository) DeactivateUser(ctx context.Context, id int64) error {
-	return r.queries.DeactivateUser(ctx, int32(id))
+func (r *PostgresUserRepository) DeactivateUser(ctx context.Context, id string) error {
+	return r.queries.DeactivateUser(ctx, id)
 }
 
-func (r *PostgresUserRepository) ActivateUser(ctx context.Context, id int64) error {
-	return r.queries.ActivateUser(ctx, int32(id))
+func (r *PostgresUserRepository) ActivateUser(ctx context.Context, id string) error {
+	return r.queries.ActivateUser(ctx, id)
 }
 
-func (r *PostgresUserRepository) VerifyUserEmail(ctx context.Context, id int64) error {
-	return r.queries.VerifyUserEmail(ctx, int32(id))
+func (r *PostgresUserRepository) VerifyUserEmail(ctx context.Context, id string) error {
+	return r.queries.VerifyUserEmail(ctx, id)
 }
 
 func (r *PostgresUserRepository) ListUsers(ctx context.Context, limit, offset int) ([]sqlc.User, error) {
@@ -145,14 +145,14 @@ func (r *PostgresUserRepository) CountUsers(ctx context.Context) (int64, error) 
 
 // User details operations
 
-func (r *PostgresUserRepository) CreateUserDetails(ctx context.Context, userID int64, fullName, phone, address string, dateOfBirth *time.Time, avatarURL, bio string) (*sqlc.UserDetail, error) {
+func (r *PostgresUserRepository) CreateUserDetails(ctx context.Context, userID string, fullName, phone, address string, dateOfBirth *time.Time, avatarURL, bio string) (*sqlc.UserDetail, error) {
 	var dob sql.NullTime
 	if dateOfBirth != nil {
 		dob = sql.NullTime{Time: *dateOfBirth, Valid: true}
 	}
 
 	details, err := r.queries.CreateUserDetails(ctx, sqlc.CreateUserDetailsParams{
-		UserID:      int32(userID),
+		UserID:      userID,
 		FullName:    sql.NullString{String: fullName, Valid: fullName != ""},
 		Phone:       sql.NullString{String: phone, Valid: phone != ""},
 		Address:     sql.NullString{String: address, Valid: address != ""},
@@ -166,8 +166,8 @@ func (r *PostgresUserRepository) CreateUserDetails(ctx context.Context, userID i
 	return &details, nil
 }
 
-func (r *PostgresUserRepository) GetUserDetailsByUserID(ctx context.Context, userID int64) (*sqlc.UserDetail, error) {
-	details, err := r.queries.GetUserDetailsByUserID(ctx, int32(userID))
+func (r *PostgresUserRepository) GetUserDetailsByUserID(ctx context.Context, userID string) (*sqlc.UserDetail, error) {
+	details, err := r.queries.GetUserDetailsByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrRecordNotFound
@@ -177,14 +177,14 @@ func (r *PostgresUserRepository) GetUserDetailsByUserID(ctx context.Context, use
 	return &details, nil
 }
 
-func (r *PostgresUserRepository) UpdateUserDetails(ctx context.Context, userID int64, fullName, phone, address string, dateOfBirth *time.Time, bio string) error {
+func (r *PostgresUserRepository) UpdateUserDetails(ctx context.Context, userID string, fullName, phone, address string, dateOfBirth *time.Time, bio string) error {
 	var dob sql.NullTime
 	if dateOfBirth != nil {
 		dob = sql.NullTime{Time: *dateOfBirth, Valid: true}
 	}
 
 	err := r.queries.UpdateUserDetails(ctx, sqlc.UpdateUserDetailsParams{
-		UserID:      int32(userID),
+		UserID:      userID,
 		FullName:    sql.NullString{String: fullName, Valid: true},
 		Phone:       sql.NullString{String: phone, Valid: true},
 		Address:     sql.NullString{String: address, Valid: true},
@@ -194,9 +194,9 @@ func (r *PostgresUserRepository) UpdateUserDetails(ctx context.Context, userID i
 	return err
 }
 
-func (r *PostgresUserRepository) UpdateUserAvatar(ctx context.Context, userID int64, avatarURL string) error {
+func (r *PostgresUserRepository) UpdateUserAvatar(ctx context.Context, userID string, avatarURL string) error {
 	err := r.queries.UpdateUserAvatar(ctx, sqlc.UpdateUserAvatarParams{
-		UserID:    int32(userID),
+		UserID:    userID,
 		AvatarUrl: sql.NullString{String: avatarURL, Valid: true},
 	})
 	return err
@@ -204,8 +204,8 @@ func (r *PostgresUserRepository) UpdateUserAvatar(ctx context.Context, userID in
 
 // Role operations
 
-func (r *PostgresUserRepository) GetRoleByID(ctx context.Context, id int64) (*sqlc.Role, error) {
-	role, err := r.queries.GetRoleByID(ctx, int32(id))
+func (r *PostgresUserRepository) GetRoleByID(ctx context.Context, id string) (*sqlc.Role, error) {
+	role, err := r.queries.GetRoleByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrRoleNotFound
@@ -248,11 +248,11 @@ func (r *PostgresUserRepository) CreateRole(ctx context.Context, roleName, descr
 
 // User-role operations
 
-func (r *PostgresUserRepository) AssignRoleToUser(ctx context.Context, userID, roleID, assignedBy int64) error {
+func (r *PostgresUserRepository) AssignRoleToUser(ctx context.Context, userID, roleID, assignedBy string) error {
 	_, err := r.queries.AssignRoleToUser(ctx, sqlc.AssignRoleToUserParams{
-		UserID:     int32(userID),
-		RoleID:     int32(roleID),
-		AssignedBy: sql.NullInt32{Int32: int32(assignedBy), Valid: assignedBy > 0},
+		UserID:     userID,
+		RoleID:     roleID,
+		AssignedBy: sql.NullString{String: assignedBy, Valid: assignedBy != ""},
 	})
 	if err != nil {
 		return mapDatabaseError(err)
@@ -260,30 +260,30 @@ func (r *PostgresUserRepository) AssignRoleToUser(ctx context.Context, userID, r
 	return nil
 }
 
-func (r *PostgresUserRepository) RemoveRoleFromUser(ctx context.Context, userID, roleID int64) error {
+func (r *PostgresUserRepository) RemoveRoleFromUser(ctx context.Context, userID, roleID string) error {
 	err := r.queries.RemoveRoleFromUser(ctx, sqlc.RemoveRoleFromUserParams{
-		UserID: int32(userID),
-		RoleID: int32(roleID),
+		UserID: userID,
+		RoleID: roleID,
 	})
 	return err
 }
 
-func (r *PostgresUserRepository) RemoveAllUserRoles(ctx context.Context, userID int64) error {
-	err := r.queries.RemoveAllUserRoles(ctx, int32(userID))
+func (r *PostgresUserRepository) RemoveAllUserRoles(ctx context.Context, userID string) error {
+	err := r.queries.RemoveAllUserRoles(ctx, userID)
 	return err
 }
 
-func (r *PostgresUserRepository) GetUserRoles(ctx context.Context, userID int64) ([]sqlc.Role, error) {
-	roles, err := r.queries.GetUserRoles(ctx, int32(userID))
+func (r *PostgresUserRepository) GetUserRoles(ctx context.Context, userID string) ([]sqlc.Role, error) {
+	roles, err := r.queries.GetUserRoles(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	return roles, nil
 }
 
-func (r *PostgresUserRepository) CheckUserHasRole(ctx context.Context, userID int64, roleName string) (bool, error) {
+func (r *PostgresUserRepository) CheckUserHasRole(ctx context.Context, userID string, roleName string) (bool, error) {
 	hasRole, err := r.queries.CheckUserHasRole(ctx, sqlc.CheckUserHasRoleParams{
-		UserID:   int32(userID),
+		UserID:   userID,
 		RoleName: roleName,
 	})
 	if err != nil {
@@ -292,9 +292,9 @@ func (r *PostgresUserRepository) CheckUserHasRole(ctx context.Context, userID in
 	return hasRole, nil
 }
 
-func (r *PostgresUserRepository) CheckUserHasAnyRole(ctx context.Context, userID int64, roleNames []string) (bool, error) {
+func (r *PostgresUserRepository) CheckUserHasAnyRole(ctx context.Context, userID string, roleNames []string) (bool, error) {
 	hasAnyRole, err := r.queries.CheckUserHasAnyRole(ctx, sqlc.CheckUserHasAnyRoleParams{
-		UserID:  int32(userID),
+		UserID:  userID,
 		Column2: roleNames,
 	})
 	if err != nil {

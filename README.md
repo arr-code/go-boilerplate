@@ -7,6 +7,7 @@ A production-ready REST API boilerplate built with Go, Gin, PostgreSQL, and clea
 - **Clean Architecture** - Separation of concerns with Handler → Service → Repository layers
 - **JWT Authentication** - Secure authentication with access and refresh tokens
 - **Role-Based Access Control (RBAC)** - Flexible permission system with multiple roles
+- **UUID Primary Keys** - All IDs use UUIDs instead of auto-increment integers
 - **Type-Safe Database Queries** - SQLC generates Go code from SQL
 - **Database Migrations** - Version-controlled schema changes with golang-migrate
 - **Docker Support** - Complete Docker development environment
@@ -161,8 +162,8 @@ The API will be available at `http://localhost:8080`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/admin/users` | List all users (paginated) |
-| PUT | `/api/v1/admin/users/:id/roles` | Assign roles to user |
-| DELETE | `/api/v1/admin/users/:id` | Deactivate user |
+| PUT | `/api/v1/admin/users/:id/roles` | Assign roles to user (`:id` is UUID) |
+| DELETE | `/api/v1/admin/users/:id` | Deactivate user (`:id` is UUID) |
 
 ### Health Check
 
@@ -257,9 +258,11 @@ make migrate-down
 
 ### Default Roles
 
-- **user** - Standard user (default for new registrations)
-- **moderator** - Moderator with extended permissions
-- **admin** - Full administrative access
+The system includes three default roles with fixed UUIDs:
+
+- **user** (`550e8400-e29b-41d4-a716-446655440001`) - Standard user (default for new registrations)
+- **admin** (`550e8400-e29b-41d4-a716-446655440002`) - Full administrative access
+- **moderator** (`550e8400-e29b-41d4-a716-446655440003`) - Moderator with extended permissions
 
 ### Assigning Roles
 
@@ -267,7 +270,7 @@ Only admins can assign roles:
 ```bash
 PUT /api/v1/admin/users/:id/roles
 {
-  "role_ids": [1, 2]
+  "role_ids": ["550e8400-e29b-41d4-a716-446655440002"]
 }
 ```
 
@@ -278,24 +281,31 @@ Roles are stored in the `roles` table with JSONB permissions field for flexibili
 ## Database Schema
 
 ### Users Table
+- **Primary Key**: UUID (generated automatically)
 - Stores authentication credentials
 - Email and username (both unique)
 - Password hash (bcrypt)
 - Active status and email verification
 
 ### User Details Table
+- **Primary Key**: UUID (generated automatically)
+- **Foreign Key**: User UUID
 - Profile information (full name, phone, address, etc.)
 - Avatar URL
 - Date of birth
 - Bio
 
 ### Roles Table
+- **Primary Key**: UUID (fixed for default roles, generated for custom roles)
 - Role definitions
 - JSONB permissions field
 
 ### User Roles Table
-- Many-to-many relationship
+- **Primary Key**: UUID (generated automatically)
+- Many-to-many relationship using UUIDs
 - Tracks who assigned the role and when
+
+**Note**: All IDs use UUIDs instead of auto-increment integers for better security and distributed system compatibility.
 
 ## Security Features
 

@@ -11,9 +11,9 @@ import (
 )
 
 type UserService interface {
-	GetProfile(ctx context.Context, userID int64) (*model.ProfileResponse, error)
-	UpdateProfile(ctx context.Context, userID int64, req *model.UpdateProfileRequest) error
-	UpdateAvatar(ctx context.Context, userID int64, fileHeader *multipart.FileHeader) (string, error)
+	GetProfile(ctx context.Context, userID string) (*model.ProfileResponse, error)
+	UpdateProfile(ctx context.Context, userID string, req *model.UpdateProfileRequest) error
+	UpdateAvatar(ctx context.Context, userID string, fileHeader *multipart.FileHeader) (string, error)
 }
 
 type userService struct {
@@ -28,7 +28,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 // GetProfile retrieves the user profile with details and roles
-func (s *userService) GetProfile(ctx context.Context, userID int64) (*model.ProfileResponse, error) {
+func (s *userService) GetProfile(ctx context.Context, userID string) (*model.ProfileResponse, error) {
 	// Get user
 	user, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -51,7 +51,7 @@ func (s *userService) GetProfile(ctx context.Context, userID int64) (*model.Prof
 	roleResponses := make([]model.RoleResponse, len(roles))
 	for i, role := range roles {
 		roleResponses[i] = model.RoleResponse{
-			ID:          int64(role.ID),
+			ID:          role.ID,
 			RoleName:    role.RoleName,
 			Description: role.Description.String,
 		}
@@ -64,7 +64,7 @@ func (s *userService) GetProfile(ctx context.Context, userID int64) (*model.Prof
 	}
 
 	userResponse := model.UserResponse{
-		ID:            int64(user.ID),
+		ID:            user.ID,
 		Email:         user.Email,
 		Username:      user.Username,
 		EmailVerified: user.EmailVerified.Bool,
@@ -105,7 +105,7 @@ func (s *userService) GetProfile(ctx context.Context, userID int64) (*model.Prof
 }
 
 // UpdateProfile updates the user profile details
-func (s *userService) UpdateProfile(ctx context.Context, userID int64, req *model.UpdateProfileRequest) error {
+func (s *userService) UpdateProfile(ctx context.Context, userID string, req *model.UpdateProfileRequest) error {
 	// Check if user exists
 	_, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -161,7 +161,7 @@ func (s *userService) UpdateProfile(ctx context.Context, userID int64, req *mode
 }
 
 // UpdateAvatar updates the user avatar
-func (s *userService) UpdateAvatar(ctx context.Context, userID int64, fileHeader *multipart.FileHeader) (string, error) {
+func (s *userService) UpdateAvatar(ctx context.Context, userID string, fileHeader *multipart.FileHeader) (string, error) {
 	// Check if user exists
 	_, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -195,7 +195,7 @@ func (s *userService) UpdateAvatar(ctx context.Context, userID int64, fileHeader
 	// 3. Get the public URL
 	// 4. Save to database
 
-	avatarURL := fmt.Sprintf("/avatars/user-%d-%d.jpg", userID, time.Now().Unix())
+	avatarURL := fmt.Sprintf("/avatars/user-%s-%d.jpg", userID, time.Now().Unix())
 
 	// Update avatar in database
 	err = s.repo.UpdateUserAvatar(ctx, userID, avatarURL)

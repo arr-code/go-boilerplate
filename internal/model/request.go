@@ -30,7 +30,7 @@ type UpdateProfileRequest struct {
 
 // AssignRolesRequest represents the role assignment request
 type AssignRolesRequest struct {
-	RoleIDs []int64 `json:"role_ids" binding:"required,min=1"`
+	RoleIDs []string `json:"role_ids" binding:"required,min=1"`
 }
 
 // PaginationRequest represents pagination parameters

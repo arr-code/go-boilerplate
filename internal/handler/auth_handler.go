@@ -106,7 +106,7 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.authService.GetCurrentUser(c.Request.Context(), userID.(int64))
+	resp, err := h.authService.GetCurrentUser(c.Request.Context(), userID.(string))
 	if err != nil {
 		if err == model.ErrUserNotFound {
 			utils.SendError(c, 404, "User not found", err)

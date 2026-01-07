@@ -11,8 +11,8 @@ import (
 
 type AdminService interface {
 	ListUsers(ctx context.Context, page, limit int) ([]model.UserListResponse, int64, error)
-	AssignRoles(ctx context.Context, userID int64, roleIDs []int64, assignedBy int64) error
-	DeactivateUser(ctx context.Context, userID int64) error
+	AssignRoles(ctx context.Context, userID string, roleIDs []string, assignedBy string) error
+	DeactivateUser(ctx context.Context, userID string) error
 }
 
 type adminService struct {
@@ -46,16 +46,16 @@ func (s *adminService) ListUsers(ctx context.Context, page, limit int) ([]model.
 	userResponses := make([]model.UserListResponse, len(users))
 	for i, user := range users {
 		// Get user roles
-		roles, err := s.repo.GetUserRoles(ctx, int64(user.ID))
+		roles, err := s.repo.GetUserRoles(ctx, user.ID)
 		if err != nil {
-			return nil, 0, fmt.Errorf("failed to get roles for user %d: %w", user.ID, err)
+			return nil, 0, fmt.Errorf("failed to get roles for user %s: %w", user.ID, err)
 		}
 
 		// Build role responses
 		roleResponses := make([]model.RoleResponse, len(roles))
 		for j, role := range roles {
 			roleResponses[j] = model.RoleResponse{
-				ID:          int64(role.ID),
+				ID:          role.ID,
 				RoleName:    role.RoleName,
 				Description: role.Description.String,
 			}
@@ -67,7 +67,7 @@ func (s *adminService) ListUsers(ctx context.Context, page, limit int) ([]model.
 		}
 
 		userResponses[i] = model.UserListResponse{
-			ID:            int64(user.ID),
+			ID:            user.ID,
 			Email:         user.Email,
 			Username:      user.Username,
 			EmailVerified: user.EmailVerified.Bool,
@@ -82,7 +82,7 @@ func (s *adminService) ListUsers(ctx context.Context, page, limit int) ([]model.
 }
 
 // AssignRoles assigns roles to a user (removes existing roles first)
-func (s *adminService) AssignRoles(ctx context.Context, userID int64, roleIDs []int64, assignedBy int64) error {
+func (s *adminService) AssignRoles(ctx context.Context, userID string, roleIDs []string, assignedBy string) error {
 	// Check if user exists
 	_, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {
@@ -94,7 +94,7 @@ func (s *adminService) AssignRoles(ctx context.Context, userID int64, roleIDs []
 		_, err := s.repo.GetRoleByID(ctx, roleID)
 		if err != nil {
 			if err == model.ErrRoleNotFound {
-				return fmt.Errorf("role with ID %d not found", roleID)
+				return fmt.Errorf("role with ID %s not found", roleID)
 			}
 			return err
 		}
@@ -110,7 +110,7 @@ func (s *adminService) AssignRoles(ctx context.Context, userID int64, roleIDs []
 	for _, roleID := range roleIDs {
 		err := s.repo.AssignRoleToUser(ctx, userID, roleID, assignedBy)
 		if err != nil {
-			return fmt.Errorf("failed to assign role %d: %w", roleID, err)
+			return fmt.Errorf("failed to assign role %s: %w", roleID, err)
 		}
 	}
 
@@ -118,7 +118,7 @@ func (s *adminService) AssignRoles(ctx context.Context, userID int64, roleIDs []
 }
 
 // DeactivateUser marks a user as inactive
-func (s *adminService) DeactivateUser(ctx context.Context, userID int64) error {
+func (s *adminService) DeactivateUser(ctx context.Context, userID string) error {
 	// Check if user exists
 	_, err := s.repo.GetUserByID(ctx, userID)
 	if err != nil {

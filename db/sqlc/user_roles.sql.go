@@ -19,9 +19,9 @@ RETURNING id, user_id, role_id, assigned_at, assigned_by
 `
 
 type AssignRoleToUserParams struct {
-	UserID     int32
-	RoleID     int32
-	AssignedBy sql.NullInt32
+	UserID     string
+	RoleID     string
+	AssignedBy sql.NullString
 }
 
 func (q *Queries) AssignRoleToUser(ctx context.Context, arg AssignRoleToUserParams) (UserRole, error) {
@@ -46,7 +46,7 @@ SELECT EXISTS(
 `
 
 type CheckUserHasAnyRoleParams struct {
-	UserID  int32
+	UserID  string
 	Column2 []string
 }
 
@@ -66,7 +66,7 @@ SELECT EXISTS(
 `
 
 type CheckUserHasRoleParams struct {
-	UserID   int32
+	UserID   string
 	RoleName string
 }
 
@@ -83,7 +83,7 @@ INNER JOIN user_roles ur ON r.id = ur.role_id
 WHERE ur.user_id = $1
 `
 
-func (q *Queries) GetUserRoles(ctx context.Context, userID int32) ([]Role, error) {
+func (q *Queries) GetUserRoles(ctx context.Context, userID string) ([]Role, error) {
 	rows, err := q.db.QueryContext(ctx, getUserRoles, userID)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ const removeAllUserRoles = `-- name: RemoveAllUserRoles :exec
 DELETE FROM user_roles WHERE user_id = $1
 `
 
-func (q *Queries) RemoveAllUserRoles(ctx context.Context, userID int32) error {
+func (q *Queries) RemoveAllUserRoles(ctx context.Context, userID string) error {
 	_, err := q.db.ExecContext(ctx, removeAllUserRoles, userID)
 	return err
 }
@@ -127,8 +127,8 @@ DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2
 `
 
 type RemoveRoleFromUserParams struct {
-	UserID int32
-	RoleID int32
+	UserID string
+	RoleID string
 }
 
 func (q *Queries) RemoveRoleFromUser(ctx context.Context, arg RemoveRoleFromUserParams) error {

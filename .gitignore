@@ -79,5 +79,4 @@ coverage.out
 coverage.html
 
 # Extras
-bruno/
-*.bru
+bruno/environments/*.bru

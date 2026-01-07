@@ -40,7 +40,7 @@ const getRoleByID = `-- name: GetRoleByID :one
 SELECT id, role_name, description, permissions, created_at, updated_at FROM roles WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetRoleByID(ctx context.Context, id int32) (Role, error) {
+func (q *Queries) GetRoleByID(ctx context.Context, id string) (Role, error) {
 	row := q.db.QueryRowContext(ctx, getRoleByID, id)
 	var i Role
 	err := row.Scan(

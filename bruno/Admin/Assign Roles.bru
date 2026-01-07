@@ -5,7 +5,7 @@ meta {
 }
 
 put {
-  url: {{base_url}}/api/v1/admin/users/1/roles
+  url: {{base_url}}/api/v1/admin/users/550e8400-e29b-41d4-a716-446655440000/roles
   body: json
   auth: bearer
 }
@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "role_ids": [2]
+    "role_ids": ["550e8400-e29b-41d4-a716-446655440002"]
   }
 }
 
@@ -33,15 +33,15 @@ tests {
 
 docs {
   # Assign Roles to User (Admin Only)
-  
+
   Assign roles to a specific user. This replaces all existing roles.
-  
-  **Role IDs:**
-  - 1: user
-  - 2: admin
-  - 3: moderator
-  
-  **Example:** Assign admin role to user ID 1
-  
+
+  **Default Role UUIDs:**
+  - 550e8400-e29b-41d4-a716-446655440001: user
+  - 550e8400-e29b-41d4-a716-446655440002: admin
+  - 550e8400-e29b-41d4-a716-446655440003: moderator
+
+  **Example:** Assign admin role to a user
+
   **Required Role:** admin
 }
